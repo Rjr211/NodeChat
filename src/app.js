@@ -1,11 +1,14 @@
+const path = require('path')
 const express = require('express')
 
 const  app = express()
 
-app.get('/public/index.html', (req, res) => {
-    res.send('Hello ChatApp')
-})
+const port = process.env.PORT || 3000
 
-app.listen(3000, () => {
-    console.log('Server started on port 3000')
+const publicDirectoryPath = path.join(__dirname, '../public')
+
+app.use(express.static(publicDirectoryPath))
+
+app.listen(port, () => {
+    console.log(`App is listening on port ${port}`)
 })
