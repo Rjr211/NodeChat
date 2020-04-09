@@ -3,11 +3,17 @@ const socket = io()
 const $messageForm = document.querySelector('#message-form')
 const $messageFormInput = $messageForm.querySelector('input')
 const $messageFormButton = $messageForm.querySelector('button')
-
 const $locationButton = document.querySelector('#send-location')
+const $messages = document.querySelector('#messages')
+//Temaplates
+const messageTemplate = document.querySelector('#message-template').innerHTML
 
 socket.on('message', (message) => {
     console.log(message)
+    const html = Mustache.render(messageTemplate, {
+        message
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
 })
 
 $messageForm.addEventListener('submit', (e) => {
@@ -38,7 +44,7 @@ $locationButton.addEventListener('click', () => {
     }
 
     $locationButton.setAttribute('disabled', 'disabled')
-    
+
     navigator.geolocation.getCurrentPosition((position) => {
         socket.emit('sendLocation', {
             latitude: position.coords.latitude,
