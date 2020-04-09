@@ -2,6 +2,8 @@ const path = require('path')
 const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
+const Filter = require('bad-words')
+
 
 const  app = express()
 const server = http.createServer(app)
@@ -14,13 +16,6 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 
 app.use(express.static(publicDirectoryPath))
 
-
-// let count = 0;
-
-// server (emit) => client (recieve) - countUpdated
-//client (emit) => server (recieve) - increment
-
-
 io.on('connection', (socket) => {
      console.log('New incoming connection')
 
@@ -29,25 +24,23 @@ io.on('connection', (socket) => {
 
     //emits to everybody but new connection
     socket.broadcast.emit('message', 'A new user has joined!')
-    // //send an event on server
-    //  socket.emit('countUpdated', count)
 
-    // //listening for event on client
-    //  socket.on('increment', () => {
-    //      count++
-    //      //listens for single event
-    //      //socket.emit('countUpdated', count)
+    socket.on('sendMessage', (message, callback) => {
+        const filter = new Filter()
 
-    //     //listens for all event
-    //      io.emit('countUpdated', count)
-    //  })
+        if( filter.isProfane(message)) {
+            return callback('Profanity is not allowed')
+        }
 
-    socket.on('sendMessage', (message) => {
         io.emit('message', message)
+
+        //event acknowledgement
+        callback()
     })
 
-    socket.on('sendLocation', (coords) => {
+    socket.on('sendLocation', (coords, callback) => {
         io.emit('message', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`)
+        callback()
     })
 
     socket.on('disconnect', () => {
